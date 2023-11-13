@@ -1,10 +1,10 @@
 from tumbrl import app
-from flask import render_template, url_for, redirect, flash
+from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, current_user
 from tumbrl.models import load_user
 from tumbrl.forms import FormLogin, FormCreateNewAccount, FormCreateNewPost
 from tumbrl import bcrypt
-from tumbrl.models import User, Posts, Like
+from tumbrl.models import User, Posts, Like, Comment
 from tumbrl import database
 
 
@@ -43,9 +43,6 @@ def createAccount():
 
         database.session.add(newUser)
         database.session.commit()
-
-        # Desafio
-        # Fazer Login e Mandar para a pagina de perfil dele
 
         login_user(newUser, remember=True)
         return redirect(url_for('profile', user_id=newUser.id))
@@ -86,7 +83,9 @@ def profile(user_id):
 
     else:
         _user = User.query.get(int(user_id))
-        return render_template('profile.html', user=_user, form=None)
+        reposts = _user.reposts
+        return render_template('profile.html', user=_user, reposts=reposts, form=None)
+
 
 @app.route('/like/<int:post_id>', methods=['POST'])
 @login_required
@@ -106,6 +105,7 @@ def like_post(post_id):
         database.session.commit()
     return redirect(url_for('profile', user_id=post.user_id))
 
+
 @app.route('/repost/<int:post_id>', methods=['POST'])
 @login_required
 def repost(post_id):
@@ -120,3 +120,38 @@ def repost(post_id):
         post.reposted_by.append(current_user)
         database.session.commit()
     return redirect(url_for('profile', user_id=post.user_id))
+
+
+@app.route('/comment/<int:post_id>', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    post = Posts.query.get(post_id)
+    if post is None:
+        flash('Post não encontrado.')
+
+    text = request.form.get('text')
+    if not text:
+        flash('O comentário não pode estar vazio')
+
+    comment = Comment(text=text, user_id=current_user.id, post_id=post.id)
+    database.session.add(comment)
+    database.session.commit()
+
+
+@app.route('/comment/<int:post_id>', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    post = Posts.query.get(post_id)
+    if post is None:
+        flash('Post não encontrado')
+
+
+    text = request.form.get('text')
+    if not text:
+        return jsonify({'error': 'O comentário não pode estar vazio'}), 400
+
+    comment = Comment(text=text, user_id=current_user.id, post_id=post.id)
+    database.session.add(comment)
+    database.session.commit()
+
+    return jsonify({'success': 'Comentário adicionado com sucesso'}), 200
