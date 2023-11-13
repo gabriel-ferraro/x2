@@ -1,4 +1,3 @@
-# Aqui vão as rotas e os links
 from tumbrl import app
 from flask import render_template, url_for, redirect, flash
 from flask_login import login_required, login_user, current_user
@@ -88,18 +87,36 @@ def profile(user_id):
     else:
         _user = User.query.get(int(user_id))
         return render_template('profile.html', user=_user, form=None)
-    
+
 @app.route('/like/<int:post_id>', methods=['POST'])
 @login_required
 def like_post(post_id):
     post = Posts.query.get(post_id)
     if post is None:
         flash('Post não encontrado.')
-        
-    if post.likes.filter_by(user_id=current_user.id).count() > 0:
-        flash('Você já curtiu este post.')
-        
-    like = Like(user_id=current_user.id, post_id=post.id)
-    database.session.add(like)
-    database.session.commit()
-    flash('Você curtiu este post.')
+
+    if Like.query.filter_by(user_id=current_user.id, post_id=post.id).first():
+        """
+        """
+
+    else:
+        like = Like(user_id=current_user.id, post_id=post.id)
+        database.session.add(like)
+        post.likes += 1  # Incrementa o número de likes no post
+        database.session.commit()
+    return redirect(url_for('profile', user_id=post.user_id))
+
+@app.route('/repost/<int:post_id>', methods=['POST'])
+@login_required
+def repost(post_id):
+    post = Posts.query.get(post_id)
+    if post is None:
+        flash('Post não encontrado.')
+    # Verifique se o usuário já fez repost do post
+    if current_user in post.reposted_by:
+        flash('Você já repostou este post.')
+    else:
+        # Adicione o usuário à lista de reposts do post
+        post.reposted_by.append(current_user)
+        database.session.commit()
+    return redirect(url_for('profile', user_id=post.user_id))
