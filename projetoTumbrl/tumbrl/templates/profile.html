@@ -30,10 +30,10 @@
         
         <p>{{post.post_text}}</p>
         <img class="img-thumbnail rounded" src="{{ url_for('static', filename='fotos_dos_posts/{}'.format(post.post_img)) }}">
-        <form method="POST" action="{{ url_for('like_post', post_id=post.id) }}">
+        <form method="POST" action="{{ url_for('like_post', post_id=post.id) }}"    >
             <button type="submit">Curtir</button>
         </form>
-        <h2>LIKES - {{ post.likes }}</h2>
+        <h2>LIKES --- {{ post.likes }}</h2>
         <form method="POST" action="{{ url_for('repost', post_id=post.id) }}">
             <button type="submit">REPOSTAR</button>
         </form>
@@ -45,14 +45,17 @@
                 <input type="text" name="text" placeholder="Adicionar comentário">
                 <button type="submit">Comentar</button>
             </form>
-        {% endfor %}
+    {% endfor %}
 
     <h2>Posts Repostados</h2>
     {% for repost in reposts %}
         <h2>Postador original - {{ repost.user.username }} </h2>
         <p>{{ repost.post_text }}</p>
-            <img class="img-thumbnail rounded" src="{{ url_for('static', filename='fotos_dos_posts/{}'.format(repost.post_img)) }}">
-        <h2>LIKES - {{ repost.likes }}</h2>
+        <img class="img-thumbnail rounded" src="{{ url_for('static', filename='fotos_dos_posts/{}'.format(repost.post_img)) }}">
+        <form method="POST" action="{{ url_for('like_post', post_id=repost.id)}}">
+            <button type="submit">Curtir</button>
+        </form>
+        <h2>LIKES --- {{ repost.likes }}</h2>
     {% endfor %}
 
 {% endblock %}

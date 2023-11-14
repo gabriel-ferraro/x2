@@ -93,17 +93,22 @@ def like_post(post_id):
     post = Posts.query.get(post_id)
     if post is None:
         flash('Post não encontrado.')
+        return redirect(url_for('homepage'))
 
-    if Like.query.filter_by(user_id=current_user.id, post_id=post.id).first():
-        """
-        """
+    existing_like = Like.query.filter_by(user_id=current_user.id, post_id=post.id).first()
 
+    if existing_like:
+        # Se o usuário já deu um like, remova o like existente
+        database.session.delete(existing_like)
+        post.likes -= 1  # Decrementa o número de likes no post
     else:
+        # Se o usuário ainda não deu um like, adicione o like
         like = Like(user_id=current_user.id, post_id=post.id)
         database.session.add(like)
         post.likes += 1  # Incrementa o número de likes no post
-        database.session.commit()
-    return redirect(url_for('profile', user_id=post.user_id))
+
+    database.session.commit()
+    return redirect(request.referrer)
 
 
 @app.route('/repost/<int:post_id>', methods=['POST'])
@@ -137,21 +142,3 @@ def add_comment(post_id):
     database.session.add(comment)
     database.session.commit()
 
-
-@app.route('/comment/<int:post_id>', methods=['POST'])
-@login_required
-def add_comment(post_id):
-    post = Posts.query.get(post_id)
-    if post is None:
-        flash('Post não encontrado')
-
-
-    text = request.form.get('text')
-    if not text:
-        return jsonify({'error': 'O comentário não pode estar vazio'}), 400
-
-    comment = Comment(text=text, user_id=current_user.id, post_id=post.id)
-    database.session.add(comment)
-    database.session.commit()
-
-    return jsonify({'success': 'Comentário adicionado com sucesso'}), 200
