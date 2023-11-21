@@ -2,12 +2,12 @@
 
 {% block titulo %}  Perfil do {{ user.username }} {% endblock %}
 
+{% block css %} <link rel="stylesheet" href="{{ url_for('static', filename= 'css/profile.css') }}"> {% endblock %}
 
 {% block body %}
 
-    <h1> Faaala {{ user.username }}!  -  {{ mesa }} </h1>
+    <h1> Perfil do usuário - {{ user.username }} </h1>
     <a href=" {{ url_for('homepage') }} "> HOME </a>
-
 
     {% if form %}
         <h2> MEU PERFIL </h2>
@@ -26,28 +26,35 @@
 
     {% endif %}
 
+    <div class="user-posts">
     {% for post in user.posts %}
-        
+        <div class="user-post">
         <p>{{post.post_text}}</p>
         <img class="img-thumbnail rounded" src="{{ url_for('static', filename='fotos_dos_posts/{}'.format(post.post_img)) }}">
         <form method="POST" action="{{ url_for('like_post', post_id=post.id) }}"    >
             <button type="submit">Curtir</button>
         </form>
         <h2>LIKES --- {{ post.likes }}</h2>
+        {% if current_user.is_authenticated and current_user.id != user.id %}
         <form method="POST" action="{{ url_for('repost', post_id=post.id) }}">
             <button type="submit">REPOSTAR</button>
         </form>
+        {% endif %}
         <h2>Comentários</h2>
-            {% for comment in post.comments %}
-                <p>{{ comment.text }}</p>
-            {% endfor %}
-            <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
-                <input type="text" name="text" placeholder="Adicionar comentário">
-                <button type="submit">Comentar</button>
-            </form>
+        {% for comment in post.comments %}
+            <p>{{ comment.text }}</p>
+        {% endfor %}
+        <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+            <textarea type="text" name="text" placeholder="Adicionar comentário"></textarea>
+            <button type="submit">Comentar</button>
+        </form>
+        </div>
     {% endfor %}
+    </div>
 
+    {% if resposts %}
     <h2>Posts Repostados</h2>
+    {% endif %}
     {% for repost in reposts %}
         <h2>Postador original - {{ repost.user.username }} </h2>
         <p>{{ repost.post_text }}</p>

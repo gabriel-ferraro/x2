@@ -10,16 +10,16 @@ from wtforms.widgets import TextArea
 
 class FormLogin(FlaskForm):
     email = StringField('Email')
-    password = PasswordField('Password')
+    password = PasswordField('Senha')
     btn = SubmitField('Login')
 
 
 class FormCreateNewAccount(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    usarname = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(6, 25)])
-    checkPassword = PasswordField('Check Password', validators=[DataRequired(), Length(6, 25), EqualTo('password')])
-    btn = SubmitField('Create Account')
+    usarname = StringField('Nome de usuário', validators=[DataRequired()])
+    password = PasswordField('Senha', validators=[DataRequired(), Length(6, 25)])
+    checkPassword = PasswordField('Confirme sua senha', validators=[DataRequired(), Length(6, 25), EqualTo('password')])
+    btn = SubmitField('Criar conta')
 
     def validate_email(self, email):
         email_of_user = User.query.filter_by(email=email.data).first()
@@ -28,6 +28,6 @@ class FormCreateNewAccount(FlaskForm):
 
 
 class FormCreateNewPost(FlaskForm):
-    text = StringField('PostText', widget=TextArea(), validators=[DataRequired()])
-    photo = FileField('Photo', validators=[DataRequired()])
-    btn = SubmitField('Publish')
+    text = StringField('Crie um novo post', widget=TextArea(), validators=[DataRequired()])
+    photo = FileField('Foto', validators=[DataRequired()])
+    btn = SubmitField('Publicar')

@@ -1,5 +1,7 @@
 {% extends "perry.html" %}
 
+{% block css %} <link rel="stylesheet" href="{{ url_for('static', filename= 'css/createAccount.css') }}"> {% endblock %}
+
 {% block body %}
 <form method="POST">
     {{ form.csrf_token }}
