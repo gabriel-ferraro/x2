@@ -4,7 +4,7 @@ from flask_login import login_required, login_user, current_user
 from tumbrl.models import load_user
 from tumbrl.forms import FormLogin, FormCreateNewAccount, FormCreateNewPost
 from tumbrl import bcrypt
-from tumbrl.models import User, Posts, Like, Comment
+from tumbrl.models import User, Posts, Like, Comment, PostComment
 from tumbrl import database
 
 
@@ -133,12 +133,21 @@ def add_comment(post_id):
     post = Posts.query.get(post_id)
     if post is None:
         flash('Post não encontrado.')
+        return redirect(request.referrer)
 
     text = request.form.get('text')
     if not text:
         flash('O comentário não pode estar vazio')
+        return redirect(request.referrer)
 
+    # Crie um novo comentário e adicione ao banco de dados
     comment = Comment(text=text, user_id=current_user.id, post_id=post.id)
     database.session.add(comment)
     database.session.commit()
 
+    # Crie a relação entre o post e o comentário
+    post_comment = PostComment(post_id=post.id, comment_id=comment.id)
+    database.session.add(post_comment)
+    database.session.commit()
+
+    return redirect(request.referrer)

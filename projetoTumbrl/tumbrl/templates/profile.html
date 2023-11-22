@@ -42,10 +42,11 @@
         {% endif %}
         <h2>Comentários</h2>
         {% for comment in post.comments %}
+            <h3>Comentário de: {{ comment.user.username }}</h3>
             <p>{{ comment.text }}</p>
         {% endfor %}
         <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
-            <textarea type="text" name="text" placeholder="Adicionar comentário"></textarea>
+            <textarea name="text" placeholder="Adicionar comentário"></textarea>
             <button type="submit">Comentar</button>
         </form>
         </div>

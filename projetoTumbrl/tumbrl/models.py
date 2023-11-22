@@ -29,7 +29,7 @@ class Posts(database.Model):
     user_id = database.Column(database.Integer, database.ForeignKey('user.id'), nullable=False)
     likes = database.Column(database.Integer, default=0)
     reposted_by = database.relationship('User', secondary='reposts', backref=database.backref('reposts', lazy='dynamic'))
-    comments = database.relationship('User', secondary='comments', backref=database.backref('comments', lazy='dynamic'))
+    comments = database.relationship('Comment', secondary='post_comments', backref=database.backref('posts', lazy='dynamic'))
 
 
 class Reposts(database.Model):
@@ -47,7 +47,16 @@ class Like(database.Model):
 
 class Comment(database.Model):
     __tablename__ = 'comments'
+    id = database.Column(database.Integer, primary_key=True)
     text = database.Column(database.String, nullable=False)
-    user_id = database.Column(database.Integer, database.ForeignKey('user.id'), primary_key=True)
-    post_id = database.Column(database.Integer, database.ForeignKey('posts.id'), primary_key=True)
     creation_date = database.Column(database.DateTime, nullable=False, default=datetime.utcnow())
+    user_id = database.Column(database.Integer, database.ForeignKey('user.id'))
+    post_id = database.Column(database.Integer, database.ForeignKey('posts.id'))
+    postComment = database.relationship('Posts', secondary='post_comments', backref=database.backref('post_comments', lazy='dynamic'))
+    user = database.relationship('User', backref=database.backref('comments', lazy='dynamic'))
+
+class PostComment(database.Model):
+    __tablename__ = 'post_comments'
+    id = database.Column(database.Integer, primary_key=True)
+    post_id = database.Column(database.Integer, database.ForeignKey('posts.id'))
+    comment_id = database.Column(database.Integer, database.ForeignKey('comments.id'))
